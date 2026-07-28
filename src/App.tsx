@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { Calendar } from './components/Calendar';
 import { TaskList } from './components/TaskList';
+import { ContactModal } from './components/ContactModal';
 import { useTasks } from './hooks/useTasks';
-import { Layout, Plus, X } from 'lucide-react';
+import { Layout, Plus, X, Mail } from 'lucide-react';
 import { useNotifications } from './hooks/useNotifications';
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
 
   const [newCatName, setNewCatName] = useState('');
   const [showAddCat, setShowAddCat] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
 
   const handleAddCategory = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +42,16 @@ export default function App() {
             <h1 className="text-xl font-bold tracking-tight">Daily Planner</h1>
             <p className="text-xs text-slate-500 font-medium">{format(new Date(), 'EEEE, MMMM d, yyyy')}</p>
           </div>
+        </div>
+        
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setIsContactModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-colors"
+          >
+            <Mail className="w-4 h-4" />
+            <span className="hidden sm:inline">제휴 문의</span>
+          </button>
         </div>
       </header>
 
@@ -127,6 +139,8 @@ export default function App() {
           />
         </div>
       </main>
+
+      <ContactModal isOpen={isContactModalOpen} onClose={() => setIsContactModalOpen(false)} />
     </div>
   );
 }
