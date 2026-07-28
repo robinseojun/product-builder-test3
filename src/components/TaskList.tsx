@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
-import { Plus, Check, Trash2, Settings2, Bell } from 'lucide-react';
+import { Plus, Check, Trash2, Settings2, Bell, Pencil } from 'lucide-react';
 import { Task, Category } from '../types';
 
 interface TaskListProps {
@@ -11,13 +11,19 @@ interface TaskListProps {
   onAddTask: (title: string, date: string, categoryId?: string, notificationTime?: string) => void;
   onToggleTask: (id: string) => void;
   onDeleteTask: (id: string) => void;
+  onUpdateTask: (id: string, updates: Partial<Task>) => void;
 }
 
-export function TaskList({ date, tasks, categories, selectedCategory, onAddTask, onToggleTask, onDeleteTask }: TaskListProps) {
+export function TaskList({ date, tasks, categories, selectedCategory, onAddTask, onToggleTask, onDeleteTask, onUpdateTask }: TaskListProps) {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskCategory, setNewTaskCategory] = useState<string>('');
   const [newTaskTime, setNewTaskTime] = useState<string>('');
   const [showOptions, setShowOptions] = useState(false);
+  
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editCategory, setEditCategory] = useState<string>('');
+  const [editTime, setEditTime] = useState<string>('');
 
   const dateString = format(date, 'yyyy-MM-dd');
   const dayTasks = tasks.filter(t => t.date === dateString && (!selectedCategory || t.categoryId === selectedCategory));
@@ -35,6 +41,28 @@ export function TaskList({ date, tasks, categories, selectedCategory, onAddTask,
       setNewTaskTime('');
       setShowOptions(false);
     }
+  };
+
+  const startEditing = (task: Task) => {
+    setEditingTaskId(task.id);
+    setEditTitle(task.title);
+    setEditCategory(task.categoryId || '');
+    setEditTime(task.notificationTime || '');
+  };
+
+  const saveEdit = (id: string) => {
+    if (editTitle.trim()) {
+      onUpdateTask(id, {
+        title: editTitle.trim(),
+        categoryId: editCategory || undefined,
+        notificationTime: editTime || undefined,
+      });
+      setEditingTaskId(null);
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingTaskId(null);
   };
 
   return (
@@ -73,6 +101,42 @@ export function TaskList({ date, tasks, categories, selectedCategory, onAddTask,
         ) : (
           dayTasks.map(task => {
             const category = categories.find(c => c.id === task.categoryId);
+            
+            if (editingTaskId === task.id) {
+              return (
+                <div key={task.id} className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-200 shadow-sm flex flex-col gap-3">
+                  <input
+                    type="text"
+                    value={editTitle}
+                    onChange={e => setEditTitle(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-indigo-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                  />
+                  <div className="flex gap-2">
+                    <select
+                      value={editCategory}
+                      onChange={e => setEditCategory(e.target.value)}
+                      className="flex-1 px-3 py-2 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none"
+                    >
+                      <option value="">카테고리 없음</option>
+                      {categories.map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
+                    </select>
+                    <input
+                      type="time"
+                      value={editTime}
+                      onChange={e => setEditTime(e.target.value)}
+                      className="flex-1 px-3 py-2 bg-white border border-indigo-200 rounded-lg text-xs focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2 mt-1">
+                    <button onClick={cancelEdit} className="px-3 py-1.5 text-xs font-bold text-slate-500 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg transition-colors">취소</button>
+                    <button onClick={() => saveEdit(task.id)} className="px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm">저장</button>
+                  </div>
+                </div>
+              );
+            }
+            
             return (
               <div 
                 key={task.id} 
@@ -123,13 +187,22 @@ export function TaskList({ date, tasks, categories, selectedCategory, onAddTask,
                     )}
                   </div>
                   
-                  <button 
-                    onClick={() => onDeleteTask(task.id)}
-                    className="ml-4 p-2 text-slate-300 hover:text-red-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all focus:opacity-100 focus:outline-none"
-                    aria-label="Delete task"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button 
+                      onClick={() => startEditing(task)}
+                      className="p-2 text-slate-400 hover:text-indigo-600 rounded-lg transition-all focus:outline-none"
+                      aria-label="Edit task"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => onDeleteTask(task.id)}
+                      className="p-2 text-slate-400 hover:text-red-500 rounded-lg transition-all focus:outline-none"
+                      aria-label="Delete task"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             );

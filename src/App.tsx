@@ -9,7 +9,7 @@ import { useNotifications } from './hooks/useNotifications';
 export default function App() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const { tasks, addTask, toggleTask, deleteTask, categories, addCategory, deleteCategory } = useTasks();
+  const { tasks, addTask, toggleTask, deleteTask, updateTask, categories, addCategory, deleteCategory } = useTasks();
   
   useNotifications(tasks);
 
@@ -123,6 +123,7 @@ export default function App() {
             onAddTask={addTask}
             onToggleTask={toggleTask}
             onDeleteTask={deleteTask}
+            onUpdateTask={updateTask}
           />
         </div>
       </main>

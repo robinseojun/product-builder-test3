@@ -64,6 +64,14 @@ export function useTasks() {
     setTasks((prev) => prev.filter((task) => task.id !== id));
   };
 
+  const updateTask = (id: string, updates: Partial<Task>) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id ? { ...task, ...updates } : task
+      )
+    );
+  };
+
   const addCategory = (name: string, color: string) => {
     const newCategory: Category = {
       id: crypto.randomUUID(),
@@ -77,5 +85,5 @@ export function useTasks() {
     setCategories((prev) => prev.filter((c) => c.id !== id));
   };
 
-  return { tasks, addTask, toggleTask, deleteTask, categories, addCategory, deleteCategory };
+  return { tasks, addTask, toggleTask, deleteTask, updateTask, categories, addCategory, deleteCategory };
 }
