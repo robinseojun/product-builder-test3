@@ -21,32 +21,60 @@ interface CalendarProps {
 
 export function Calendar({ selectedDate, onSelectDate, taskDates }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = React.useState(startOfMonth(selectedDate));
+  const [isEditingDate, setIsEditingDate] = React.useState(false);
 
   const nextMonth = () => setCurrentMonth(addMonths(currentMonth, 1));
   const prevMonth = () => setCurrentMonth(subMonths(currentMonth, 1));
 
+  const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), parseInt(e.target.value), 1));
+  };
+
+  const handleYearChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const year = parseInt(e.target.value);
+    if (!isNaN(year) && year > 1900 && year < 2100) {
+      setCurrentMonth(new Date(year, currentMonth.getMonth(), 1));
+    }
+  };
+
   const renderHeader = () => {
     return (
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-bold text-sm text-slate-900">
-          {format(currentMonth, 'MMMM yyyy')}
-        </h2>
-        <div className="flex gap-2">
+      <div className="flex items-center justify-center mb-6 h-8">
+        {isEditingDate ? (
+          <div className="flex gap-1.5 items-center bg-slate-50 p-1 rounded-lg border border-slate-200 shadow-sm">
+            <select
+              value={currentMonth.getMonth()}
+              onChange={handleMonthChange}
+              className="text-base font-bold text-slate-700 bg-transparent outline-none cursor-pointer"
+            >
+              {Array.from({ length: 12 }, (_, i) => (
+                <option key={i} value={i}>{format(new Date(0, i), 'MMMM')}</option>
+              ))}
+            </select>
+            <span className="text-slate-300 font-bold text-lg">-</span>
+            <input
+              type="number"
+              defaultValue={currentMonth.getFullYear()}
+              onChange={handleYearChange}
+              onKeyDown={(e) => e.key === 'Enter' && setIsEditingDate(false)}
+              className="w-16 text-base font-bold text-slate-700 bg-transparent outline-none text-center"
+            />
+            <button 
+              onClick={() => setIsEditingDate(false)} 
+              className="w-6 h-6 bg-indigo-100 text-indigo-700 rounded flex items-center justify-center hover:bg-indigo-200 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
+            </button>
+          </div>
+        ) : (
           <button 
-            onClick={prevMonth}
-            className="w-6 h-6 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center cursor-pointer transition-colors"
-            aria-label="Previous month"
+            onClick={() => setIsEditingDate(true)}
+            className="font-bold text-lg text-slate-900 hover:text-indigo-600 transition-colors flex items-center gap-2"
           >
-            <ChevronLeft className="w-4 h-4 text-slate-600" />
+            {format(currentMonth, 'MMMM - yyyy')}
+            <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
           </button>
-          <button 
-            onClick={nextMonth}
-            className="w-6 h-6 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center cursor-pointer transition-colors"
-            aria-label="Next month"
-          >
-            <ChevronRight className="w-4 h-4 text-slate-600" />
-          </button>
-        </div>
+        )}
       </div>
     );
   };
@@ -120,11 +148,33 @@ export function Calendar({ selectedDate, onSelectDate, taskDates }: CalendarProp
     return <div className="grid grid-cols-7 gap-y-3 text-center">{days}</div>;
   };
 
+  const renderFooter = () => {
+    return (
+      <div className="flex justify-center gap-4 mt-6">
+        <button 
+          onClick={prevMonth}
+          className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center cursor-pointer transition-colors shadow-sm border border-slate-100"
+          aria-label="Previous month"
+        >
+          <ChevronLeft className="w-5 h-5 text-slate-600" />
+        </button>
+        <button 
+          onClick={nextMonth}
+          className="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center cursor-pointer transition-colors shadow-sm border border-slate-100"
+          aria-label="Next month"
+        >
+          <ChevronRight className="w-5 h-5 text-slate-600" />
+        </button>
+      </div>
+    );
+  };
+
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl p-5 flex flex-col shadow-sm">
+    <div className="bg-white border border-slate-200 rounded-3xl p-5 flex flex-col shadow-sm relative">
       {renderHeader()}
       {renderDays()}
       {renderCells()}
+      {renderFooter()}
     </div>
   );
 }
