@@ -439,7 +439,7 @@ export function TaskList({ date, tasks, categories, selectedCategory, onAddTask,
               type="text"
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
-              placeholder="자연어로 일정을 입력해 보세요 (예: 내일 오후 3시 팀 회의 잡아줘)"
+              placeholder="일정을 입력해 보세요 (예: 내일 오후 3시 팀 회의 잡아줘)"
               className="flex-1 pl-12 pr-4 py-3.5 bg-slate-50 border border-indigo-100 rounded-2xl text-sm text-slate-900 focus:outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium placeholder-slate-400 shadow-inner"
               disabled={isParsing || !!parsedTask}
             />
