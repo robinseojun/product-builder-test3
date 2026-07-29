@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
+import { ko } from 'date-fns/locale';
 import { Plus, Check, Trash2, Settings2, Bell, Pencil, Sparkles, Send, Clock, List } from 'lucide-react';
 import { Task, Category } from '../types';
 
@@ -44,10 +45,11 @@ export function TaskList({ date, tasks, categories, selectedCategory, onAddTask,
     // Use AI Parsing
     setIsParsing(true);
     try {
+      const currentDateTimeString = format(new Date(), "yyyy-MM-dd (EEEE) HH:mm", { locale: ko });
       const response = await fetch('/api/parse-task', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: newTaskTitle.trim(), currentDate: dateString })
+        body: JSON.stringify({ text: newTaskTitle.trim(), currentDate: currentDateTimeString })
       });
       
       if (response.ok) {
@@ -84,7 +86,7 @@ export function TaskList({ date, tasks, categories, selectedCategory, onAddTask,
       parsedTask.title, 
       parsedTask.date || dateString, 
       catId, 
-      parsedTask.time || undefined,
+      parsedTask.startTime || parsedTask.time || undefined,
       parsedTask.priority
     );
     resetForm();
@@ -388,10 +390,10 @@ export function TaskList({ date, tasks, categories, selectedCategory, onAddTask,
                   <label className="text-[10px] font-bold text-slate-500 uppercase">날짜</label>
                   <div className="text-sm font-medium text-slate-900">{parsedTask.date || dateString}</div>
                 </div>
-                {parsedTask.time && (
+                {(parsedTask.startTime || parsedTask.time) && (
                   <div className="flex-1">
                     <label className="text-[10px] font-bold text-slate-500 uppercase">시간</label>
-                    <div className="text-sm font-medium text-slate-900">{parsedTask.time}</div>
+                    <div className="text-sm font-medium text-slate-900">{parsedTask.startTime || parsedTask.time}{parsedTask.endTime ? ` - ${parsedTask.endTime}` : ''}</div>
                   </div>
                 )}
               </div>
