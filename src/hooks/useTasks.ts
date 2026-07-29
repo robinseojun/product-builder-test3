@@ -40,14 +40,15 @@ export function useTasks() {
     localStorage.setItem('planner_categories', JSON.stringify(categories));
   }, [categories]);
 
-  const addTask = (title: string, date: string, categoryId?: string, notificationTime?: string) => {
+  const addTask = (title: string, date: string, categoryId?: string, notificationTime?: string, priority?: 'High' | 'Medium' | 'Low') => {
     const newTask: Task = {
       id: crypto.randomUUID(),
       title,
       completed: false,
       date,
       categoryId,
-      notificationTime
+      notificationTime,
+      priority
     };
     setTasks((prev) => [...prev, newTask]);
   };

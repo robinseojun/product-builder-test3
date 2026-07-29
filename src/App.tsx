@@ -60,7 +60,8 @@ export default function App() {
           <Calendar 
             selectedDate={selectedDate} 
             onSelectDate={setSelectedDate} 
-            taskDates={taskDates}
+            tasks={tasks}
+            categories={categories}
           />
           
           <div className="bg-slate-200/50 rounded-3xl p-5 border border-slate-300/50 hidden lg:flex flex-col flex-1 min-h-[200px]">

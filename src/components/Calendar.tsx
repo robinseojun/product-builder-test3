@@ -12,14 +12,16 @@ import {
   addDays 
 } from 'date-fns';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Task, Category } from '../types';
 
 interface CalendarProps {
   selectedDate: Date;
   onSelectDate: (date: Date) => void;
-  taskDates: string[]; // Dates with tasks to show indicators
+  tasks: Task[];
+  categories: Category[];
 }
 
-export function Calendar({ selectedDate, onSelectDate, taskDates }: CalendarProps) {
+export function Calendar({ selectedDate, onSelectDate, tasks, categories }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = React.useState(startOfMonth(selectedDate));
   const [isEditingDate, setIsEditingDate] = React.useState(false);
 
@@ -113,18 +115,25 @@ export function Calendar({ selectedDate, onSelectDate, taskDates }: CalendarProp
         const isCurrentMonth = isSameMonth(day, monthStart);
         const isToday = isSameDay(day, new Date());
         const dateString = format(day, 'yyyy-MM-dd');
-        const hasTask = taskDates.includes(dateString);
+        
+        const dayTasks = tasks.filter(t => t.date === dateString);
+        // Get up to 3 unique category colors, or fallback to default
+        const dotColors = Array.from(new Set(dayTasks.map(t => {
+          if (!t.categoryId) return '#94a3b8'; // default slate-400
+          const cat = categories.find(c => c.id === t.categoryId);
+          return cat ? cat.color : '#94a3b8';
+        }))).slice(0, 3);
 
         days.push(
           <div
             key={day.toString()}
             onClick={() => onSelectDate(cloneDay)}
-            className={`relative flex justify-center items-center cursor-pointer transition-all ${
+            className={`relative flex flex-col justify-start items-center cursor-pointer transition-all h-10 ${
               !isCurrentMonth ? 'text-slate-300' : 'text-slate-700 hover:text-indigo-600'
             }`}
           >
             <div
-              className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium ${
+              className={`flex items-center justify-center w-7 h-7 rounded-full text-sm font-medium ${
                 isSelected
                   ? 'bg-indigo-600 text-white shadow-sm'
                   : isToday
@@ -134,11 +143,16 @@ export function Calendar({ selectedDate, onSelectDate, taskDates }: CalendarProp
             >
               {formattedDate}
             </div>
-            {hasTask && !isSelected && (
-              <div className="absolute bottom-0 w-1 h-1 bg-indigo-400 rounded-full"></div>
-            )}
-            {hasTask && isSelected && (
-              <div className="absolute bottom-0 w-1 h-1 bg-white rounded-full opacity-80"></div>
+            {dotColors.length > 0 && (
+              <div className="flex gap-0.5 mt-0.5">
+                {dotColors.map((color, idx) => (
+                  <div 
+                    key={idx} 
+                    className="w-1.5 h-1.5 rounded-full" 
+                    style={{ backgroundColor: isSelected ? 'rgba(255,255,255,0.7)' : color }}
+                  ></div>
+                ))}
+              </div>
             )}
           </div>
         );
