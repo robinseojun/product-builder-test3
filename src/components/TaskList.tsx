@@ -56,14 +56,13 @@ export function TaskList({ date, tasks, categories, selectedCategory, onAddTask,
         const data = await response.json();
         setParsedTask(data);
       } else {
-        // Fallback to direct add on error
-        onAddTask(newTaskTitle.trim(), dateString);
-        resetForm();
+        alert("AI 일정 분석 중 오류가 발생했습니다. (API 설정 문제)");
+        return;
       }
     } catch (err) {
       console.error(err);
-      onAddTask(newTaskTitle.trim(), dateString);
-      resetForm();
+      alert("AI 일정 분석 중 오류가 발생했습니다. 네트워크 상태를 확인해주세요.");
+      return;
     } finally {
       setIsParsing(false);
     }
